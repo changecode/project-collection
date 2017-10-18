@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.test.mapper.RoleMapper">
+    <sql id="selectId">
+        id,
+        state,
+        name,
+        roleKey,
+        description
+    </sql>
+    <select id="seletUserRole" resultType="com.test.entity.RoleFormMap">
+        select
+        <include refid="selectId"/>
+        from ly_role
+        where ly_role.id
+        in (SELECT roleId FROM ly_user_role WHERE
+        userId=#{userId})
+    </select>
+</mapper>

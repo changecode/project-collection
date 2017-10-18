@@ -1,0 +1,6 @@
+package com.test.mapper;
+
+import com.test.mapper.base.BaseMapper;
+
+public interface ServerInfoMapper extends BaseMapper {
+}
