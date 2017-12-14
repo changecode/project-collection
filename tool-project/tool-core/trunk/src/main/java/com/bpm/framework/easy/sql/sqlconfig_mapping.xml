@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mapping>
+	<class name="com.bpm.framework.easy.sql.SqlBeanMap">
+		<map-to xml="SqlMap" />
+		<field name="items" type="com.bpm.framework.easy.sql.SqlBean"
+			collection="collection">
+			<bind-xml name="sql" node="element" />
+		</field>
+		<field name="sqlFiles"
+			type="com.bpm.framework.easy.sql.SqlFile"
+			collection="collection">
+			<bind-xml name="import" node="element" />
+		</field>
+		<field name="queryItems" type="com.bpm.framework.easy.sql.QueryBean"
+			collection="collection">
+			<bind-xml name="query" node="element" />
+		</field>
+	</class>
+	<class name="com.bpm.framework.easy.sql.QueryBean">
+		<field name="key">
+			<bind-xml name="key" node="attribute" />
+		</field>
+		<field name="queryDialects" type="com.bpm.framework.easy.sql.QueryDialect"
+			collection="collection">
+			<bind-xml name="dialect" node="element" />
+		</field>
+	</class>
+	<class name="com.bpm.framework.easy.sql.QueryDialect">
+		<field name="db">
+			<bind-xml name="db" node="attribute" />
+		</field>
+		<field name="value">
+			<bind-xml node="text" />
+		</field>
+	</class>
+	<class name="com.bpm.framework.easy.sql.SqlBean">
+		<field name="key">
+			<bind-xml name="key" node="attribute" />
+		</field>
+		<field name="type">
+			<bind-xml name="type" node="attribute" />
+		</field>
+		<field name="value">
+			<bind-xml node="text" />
+		</field>
+	</class>
+	<class name="com.bpm.framework.easy.sql.SqlFile">
+		<field name="resource">
+			<bind-xml name="resource" node="attribute" />
+		</field>
+	</class>
+</mapping>
