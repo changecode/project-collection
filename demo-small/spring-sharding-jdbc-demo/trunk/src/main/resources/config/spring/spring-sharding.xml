@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:rdb="http://www.dangdang.com/schema/ddframe/rdb"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.dangdang.com/schema/ddframe/rdb
+        http://www.dangdang.com/schema/ddframe/rdb/rdb.xsd">
+
+
+	<context:component-scan base-package="com.fulihui.sharding.jdbc" />
+
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.fulihui.sharding.jdbc.dal.mapper"/>
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
+    </bean>
+    
+    <!-- 配置sqlSessionFactory -->
+     <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="shardingDataSource"/>
+        <property name="mapperLocations" value="classpath*:config/mapper/*-mapper.xml"/>
+    </bean>
+
+    <!-- 路由表、路由库规则配置，可以指定algorithm-class专门自己实现具体的路由规则，也可以使用表达式-->
+    <rdb:strategy id="userDatabaseShardingStrategy" sharding-columns="user_id" algorithm-class="com.fulihui.sharding.jdbc.algorithm.UserDatabaseShardingAlgorithm"/>
+    <rdb:strategy id="userTableShardingStrategy" sharding-columns="user_id" algorithm-class="com.fulihui.sharding.jdbc.algorithm.UserTableShardingAlgorithm"/>
+
+    <!-- 使用表达式方式 -->
+    <rdb:strategy id="studentDatabaseShardingStrategy" sharding-columns="student_id" algorithm-expression="sharding_${student_id.longValue() % 2}"/>
+    <rdb:strategy id="studentTableShardingStrategy" sharding-columns="student_id" algorithm-expression="t_student_${student_id.longValue() % 2}"/>
+
+    <rdb:data-source id="shardingDataSource">
+        <rdb:sharding-rule data-sources="sharding_0,sharding_1">
+            <rdb:table-rules>
+                <rdb:table-rule logic-table="t_user" actual-tables="sharding_${0..1}.t_user_${0..2}" database-strategy="userDatabaseShardingStrategy" table-strategy="userTableShardingStrategy"/>
+                <rdb:table-rule logic-table="t_student" actual-tables="sharding_${0..1}.t_student_${0..1}" database-strategy="studentDatabaseShardingStrategy" table-strategy="studentTableShardingStrategy"/>
+            </rdb:table-rules>
+            <rdb:default-database-strategy sharding-columns="none" algorithm-class="com.dangdang.ddframe.rdb.sharding.api.strategy.database.NoneDatabaseShardingAlgorithm"/>
+            <rdb:default-table-strategy sharding-columns="none" algorithm-class="com.dangdang.ddframe.rdb.sharding.api.strategy.table.NoneTableShardingAlgorithm"/>
+        </rdb:sharding-rule>
+        <rdb:props>
+            <prop key="metrics.enable">false</prop>
+        </rdb:props>
+    </rdb:data-source>
+
+    <!-- 事务 -->
+    <bean id="transactionManager"
+          class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="shardingDataSource" />
+    </bean>
+
+    <tx:annotation-driven transaction-manager="transactionManager" />
+
+</beans>
